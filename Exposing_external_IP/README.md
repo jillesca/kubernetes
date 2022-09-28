@@ -67,11 +67,11 @@ Pods Status:    5 Running / 0 Waiting / 0 Succeeded / 0 Failed
 
 If a this point I try to see the hello world containers, it will fail.
 
+```bash
 ╰─ kubectl get services                                                                                                                ─╯
 NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   9m26s
 
-```bash
 ╰─ ping 10.96.0.1 -c 4                                                                                                                 ─╯
 PING 10.96.0.1 (10.96.0.1): 56 data bytes
 Request timeout for icmp_seq 0
