@@ -81,6 +81,7 @@ Request timeout for icmp_seq 2
 --- 10.96.0.1 ping statistics ---
 4 packets transmitted, 0 packets received, 100.0% packet loss
 
+```bash
 ╰─ curl 10.96.0.1 -vvv                                                                                                                 ─╯
 *   Trying 10.96.0.1:80...
 * connect to 10.96.0.1 port 80 failed: Operation timed out
@@ -100,4 +101,73 @@ service/my-service exposed
 ╰─ kubectl get services my-service                                                                                                     ─╯
 NAME         TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
 my-service   NodePort   10.98.157.104   <none>        8080:32375/TCP   15s
+
+╰─ kubectl describe services my-service                                                                                         ─╯
+Name:                     my-service
+Namespace:                default
+Labels:                   app.kubernetes.io/name=load-balancer-example
+Annotations:              <none>
+Selector:                 app.kubernetes.io/name=load-balancer-example
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.98.157.104
+IPs:                      10.98.157.104
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  32375/TCP
+Endpoints:                172.17.0.2:8080,172.17.0.3:8080,172.17.0.4:8080 + 2 more...
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+Finally, on minikube you need to open a tunnel to reach your containers
+
+```bash
+╰─ minikube service list                                                                                                               ─╯
+|-------------|------------|--------------|-----|
+|  NAMESPACE  |    NAME    | TARGET PORT  | URL |
+|-------------|------------|--------------|-----|
+| default     | kubernetes | No node port |
+| default     | my-service |         8080 |     |
+| kube-system | kube-dns   | No node port |
+|-------------|------------|--------------|-----|
+
+
+╰─ minikube service my-service                                                                                                         ─╯
+|-----------|------------|-------------|---------------------------|
+| NAMESPACE |    NAME    | TARGET PORT |            URL            |
+|-----------|------------|-------------|---------------------------|
+| default   | my-service |        8080 | http://192.168.49.2:32375 |
+|-----------|------------|-------------|---------------------------|
+🏃  Starting tunnel for service my-service.
+|-----------|------------|-------------|------------------------|
+| NAMESPACE |    NAME    | TARGET PORT |          URL           |
+|-----------|------------|-------------|------------------------|
+| default   | my-service |             | http://127.0.0.1:61401 |
+|-----------|------------|-------------|------------------------|
+🎉  Opening service default/my-service in default browser...
+❗  Because you are using a Docker driver on darwin, the terminal needs to be open to run it.
+```
+
+After this, in your browser or another terminal, you will be able to reach your containers.
+
+```bash
+╰─ curl 127.0.0.1:61401 -vvv                                                                                                    ─╯
+*   Trying 127.0.0.1:61401...
+* Connected to 127.0.0.1 (127.0.0.1) port 61401 (#0)
+> GET / HTTP/1.1
+> Host: 127.0.0.1:61401
+> User-Agent: curl/7.79.1
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Date: Thu, 29 Sep 2022 08:20:53 GMT
+< Connection: keep-alive
+< Transfer-Encoding: chunked
+<
+* Connection #0 to host 127.0.0.1 left intact
+Hello Kubernetes!%
 ```
